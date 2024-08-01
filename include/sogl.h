@@ -10,6 +10,8 @@
 #include "core/ctx/store.h"
 #include "core/ctx/render.h"
 #include "core/sgl.h"
+#include "core/backend/sg2D/shapes.h"
+// #include "core/backend/sg3D"
 
 #define SG_MALLOC(sz) malloc(sz);
 

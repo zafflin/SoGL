@@ -31,6 +31,9 @@
 SGshader defaultShader = {.program=-1};
 SGvertexbuffer defaultBuffer = {.nverts=0, .vao=-1, .vbo=-1};
 
+typedef struct SGcolor3 { u32 r, g, b; } SGcolor3;
+typedef struct SGcolor4 { u32 r, g, b, a; } SGcolor4;
+
 void sgFrameBufferCallback(SGwindow* win, int w, int h) {
     glViewport(0,0,w,h);
 }

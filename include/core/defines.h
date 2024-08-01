@@ -109,11 +109,17 @@ void sgStoreMesh(SGhandle* handle);
 void sgStoreShader(SGhandle* handle);
 void sgStoreTexture(SGhandle* handle);
 
-typedef struct SGdrawcall SGdrawcall;
-void sgGetDrawCallStr(const SGdrawcall* call, char* str);
+typedef struct SGdrawcall {
+    unsigned int err;
+    int vao;
+    int texID;
+    int shader;
+    unsigned int nvertices;
+} SGdrawcall;
+void sgGetRenderModeStr(char* str);
 void sgBeginRender(u32 mode);
-SGdrawcall sgDrawCall(SGhandle mhandle, SGhandle shandle);
-void sgRender(SGdrawcall call);
+SGdrawcall* sgDrawCall(const SGhandle* mhandle, const SGhandle* shandle);
+void sgRender(SGdrawcall* call);
 void sgUnbindRender(void);
 void sgEndRender(void* window);
 

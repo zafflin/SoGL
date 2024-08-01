@@ -96,8 +96,8 @@ void sgStoreMesh(SGhandle* handle) {
         if (mblock.num+1 < mblock.max) {
             SGmeshconfig* config = (SGmeshconfig*)handle->config;
             sgLogInfo("Storing Mesh: VERTEX: %d | VBO: %d", config->vbuffer.nverts, config->vbuffer.vbo);
-            mblock.vao[index] = config->vbuffer.vao;
-            mblock.vbo[index] = config->vbuffer.vbo;
+            if (mblock.vao[index] == config->vbuffer.vao) { return; } else mblock.vao[index] = config->vbuffer.vao;
+            if (mblock.vbo[index] == config->vbuffer.vbo) { return; } else mblock.vbo[index] = config->vbuffer.vbo;
             mblock.num++;
             sgLogInfo("STORED MESH: [%d] COUNT: [%d] MAX: [%d]", index, mblock.num, mblock.max);
         }
