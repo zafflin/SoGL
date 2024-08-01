@@ -33,9 +33,9 @@ typedef struct SGcontext SGcontext;
 
 // Dynamic vertex buffers (position + texcoords + colors + indices arrays)
 typedef struct SGvertexbuffer {
-    int nverts;                 // Number of vertices in the buffer (9: x, y, z, u, v, r, g, b)
+    int nverts;                 // Number of vertices in the buffer
     unsigned int vao;           // OpenGL Vertex Array Object id
-    unsigned int vbo;        // OpenGL Vertex Buffer Objects id (4 types of vertex data [position, texture, color, normal])
+    unsigned int vbo[4];           // OpenGL Vertex Buffer Objects id (4 types of vertex data [position, texture, color, normal])
 } SGvertexbuffer;
 
 typedef struct SGshader {
@@ -43,11 +43,20 @@ typedef struct SGshader {
     // other fields ( uniforms, etc...? )
 } SGshader;
 
+typedef struct SGtexture2D {
+    unsigned int width;
+    unsigned int height;
+    unsigned int glref;        // OpenGL context ID
+    unsigned char* raw;      // raw image data
+    unsigned int nchannels;     // number of color channels (e.g. RGB(3), RGBA(4))
+} SGtexture2D;
+
 // Resource Types
+#define SG_RESOURCE_TYPES 3     // global count of resource types (mainly for generation count)
 typedef enum ResourceType {
-    SG_TEXTURE,
+    SG_MESH=0,
     SG_SHADER,
-    SG_MESH
+    SG_TEXTURE
 } ResourceType;
 
 typedef enum SGhandletype {
@@ -68,8 +77,8 @@ typedef struct SGhandle {
 // Configuration Data Structures
 typedef struct SGtexconfig {
     char* src;
-    unsigned int width;
-    unsigned int height;
+   unsigned int format;
+   SGtexture2D texture2D;
 } SGtexconfig;
 
 typedef struct SGshaderconfig {
@@ -79,8 +88,10 @@ typedef struct SGshaderconfig {
 } SGshaderconfig;
 
 typedef struct SGmeshconfig {
-    float* _vtemp;  // temporary copy to pass along to the Constructor Context
+    float* verts;  // temporary copy of vertices to pass along to the Constructor Context
+    float* texcoords;  // temporary copy of vertices to pass along to the Constructor Context
     unsigned int nvertices;
+    unsigned int ntexcoords;
     SGvertexbuffer vbuffer;
 } SGmeshconfig;
 
@@ -92,9 +103,10 @@ void sgGetHandleStr(const SGhandle* handle, char* str) {
 
 void sgBindGenerator(SGhandle* target);
 void sgUnbindGenerator(void);
-SGhandle sgGenMesh(float* verts, unsigned int nverts);
-SGhandle sgGenShader(const char* vert_src, const char* frag_src);
-SGhandle sgGenTexture(char* src);
+SGhandle sgGenHandle(u32 htype, ...);
+SGhandle sgGenTexture(va_list args);
+SGhandle sgGenShader(va_list args);
+SGhandle sgGenMesh(va_list args);
 
 void* sgBindConstructor(SGhandle* target);
 void sgUnbindConstructor(void);
@@ -118,7 +130,7 @@ typedef struct SGdrawcall {
 } SGdrawcall;
 void sgGetRenderModeStr(char* str);
 void sgBeginRender(u32 mode);
-SGdrawcall* sgDrawCall(const SGhandle* mhandle, const SGhandle* shandle);
+SGdrawcall* sgDrawCall(const SGhandle* mhandle, const SGhandle* shandle, const SGhandle* thandle);
 void sgRender(SGdrawcall* call);
 void sgUnbindRender(void);
 void sgEndRender(void* window);

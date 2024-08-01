@@ -32,19 +32,19 @@ static void sgLog(const char *message, ...)
 char *sgReadFile(const char *path) {
     FILE *file = fopen(path, "rb");
     if (file == NULL) {
-        sgLogError("ReadFile :: UNABLE TO ACCESS FILE[%s]",path);
+        sgLogError("ReadFile :: UNABLE TO ACCESS FILE");
         return NULL;
     }
 
     if (fseek(file, 0, SEEK_END) != 0) {
-        sgLogError("ReadFile :: UNABLE TO SEEK IN FILE[%s]",path);
+        sgLogError("ReadFile :: UNABLE TO SEEK IN FILE");
         fclose(file );
         return NULL;
     }
 
     long len = ftell(file);
     if (len == -1) {
-        sgLogError("ReadFile :: UNABLE TO DETERMINE SIZE OF FILE[%s]",path);
+        sgLogError("ReadFile :: UNABLE TO DETERMINE SIZE OF FILE");
         fclose(file);
         return NULL;
     }
@@ -58,7 +58,7 @@ char *sgReadFile(const char *path) {
 
     size_t readSize = fread(fileContent, 1, len, file);
     if (readSize < (size_t)len) {
-        sgLogError("ReadFile :: UNABLE TO READ FILE[%s] :: READ [%zu/%ld]",path, readSize, len);
+        sgLogError("ReadFile :: UNABLE TO READ FILE :: READ [%zu/%ld]", readSize, len);
         return NULL;
     }
     fileContent[len] = '\0';

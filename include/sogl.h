@@ -10,7 +10,7 @@
 #include "core/ctx/store.h"
 #include "core/ctx/render.h"
 #include "core/sgl.h"
-#include "core/backend/sg2D/shapes.h"
+#include "core/shapes.h"
 // #include "core/backend/sg3D"
 
 #define SG_MALLOC(sz) malloc(sz);
@@ -45,6 +45,7 @@ struct SGcontext {
   b8 init;
 };
 static SGcontext SOGL;
+static SGhandle sgDefaultShader = {0};
 
 void sgContextDebug(const SGcontext *ctx) {
 	sgLogInfo("SGcontext debug");
@@ -113,4 +114,29 @@ void soglInit(void) {
     sgInitResourceBlock(SG_TEXTURE);
 
     sgContextDebug(&SOGL);
+
+    #ifdef SG_PRECOMPILE
+      const char* sgDefaultVertexShader = 
+      "# version 400 core\n"
+      "layout (location=0) in vec3 vPos;\n"
+      "layout (location=1) in vec2 vTexCoord;\n"
+      "out vec2 texCoord;\n"
+      "void main() {\n"
+      "   gl_Position = vec4(vPos, 1.0);\n"
+      "   texCoord = vec2(vTexCoord);\n"
+      "}";
+      
+      const char* sgDefaultFragmentShader = 
+      "#version 400 core\n"
+      "out vec4 fragColor;\n"
+      "in vec2 texCoord;\n"
+      "uniform sampler2D fTexture;\n"
+      "void main() {\n"
+      "   vec4 baseColor = vec4(1.0);\n"
+      "   fragColor = texture(fTexture, texCoord) * baseColor;\n"
+      "}";
+
+      sgDefaultShader = sgGenHandle(SG_SHADER, sgDefaultVertexShader, sgDefaultFragmentShader);
+      sgBindConstructor(&sgDefaultShader);
+    #endif
 }

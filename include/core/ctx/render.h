@@ -11,9 +11,10 @@ typedef struct SGrcontext {
     SGvec4 clearcolor;
     unsigned int mode;
     unsigned int npass;     // number of render passes (cycles)
+    unsigned int drawcalls; // number of draw calls recieved
     SGdrawcall* call;
 } SGrcontext;
-static SGrcontext rcontext = {.bound=SGFALSE, .clearcolor=(SGvec4){0.0f, 0.0f, 0.0f, 0.0f}, .mode=SG_CLEAR, .npass=0, .call=NULL};
+static SGrcontext rcontext = {.bound=SGFALSE, .clearcolor=(SGvec4){0.0f, 0.0f, 0.0f, 0.0f}, .mode=SG_CLEAR, .npass=0, .call=NULL, .drawcalls=0};
 
 void sgGetRenderModeStr(char* str) {
     if (rcontext.mode == SG_LINES) sprintf(str, "SG_LINES");
@@ -46,18 +47,25 @@ void sgBeginRender(u32 mode) {
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 }
 
-SGdrawcall* sgDrawCall(const SGhandle* mhandle, const SGhandle* shandle) {
+SGdrawcall* sgDrawCall(const SGhandle* mhandle, const SGhandle* shandle, const SGhandle* thandle) {
     SGdrawcall* call = &defaultCall;
-    if (!mhandle->err && !shandle->err && mhandle->type == SG_MESH) {
+    b8 hasTexture = 0;
+    if (thandle != NULL && !thandle->err) hasTexture=1;
+    if (mhandle && !mhandle->err && !shandle->err && mhandle->type == SG_MESH) {
         SGmeshconfig mconfig = *(SGmeshconfig*)mhandle->config;
         SGshaderconfig sconfig = *(SGshaderconfig*)shandle->config;
         call->err=0;
         call->vao=mconfig.vbuffer.vao;
-        call->texID=0;
+        if (hasTexture == 1) {
+            SGtexconfig tconfig = *(SGtexconfig*)thandle->config;
+            call->texID=tconfig.texture2D.glref;
+        } else {
+            call->texID=0;
+        }
         call->shader=sconfig.shader.program;
         call->nvertices=mconfig.nvertices;
         // sgLogSuccess("GENERATED DRAW CALL\n");
-    } else sgLogError("FAILED TO GENERATE DRAW CALL FOR GIVEN DATA\n");
+    }// else sgLogError("FAILED TO GENERATE DRAW CALL FOR GIVEN DATA\n");
     // sgLogInfo("SENDING DRAW CALL\n");
     return call;
 };
@@ -71,7 +79,7 @@ void sgClearColor(f32 r, f32 g, f32 b, f32 a) {
 
 void sgRender(SGdrawcall* call) {
     // sgLogInfo("BINDING DRAW CALL TO RENDER CONTEXT\n");
-    sgBindRender(call);
+    sgBindRender(call); rcontext.drawcalls++;
     // sgLogInfo("DRAW CALL BOUND TO RENDER CONTEXT\n");
     glBindTexture(GL_TEXTURE_2D, call->texID);
     glUseProgram(call->shader);

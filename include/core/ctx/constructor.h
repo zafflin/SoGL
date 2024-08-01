@@ -62,13 +62,50 @@ void sgConstMesh(void) {
     SGmeshconfig* config = (SGmeshconfig*)ccontext.target->config;
 
     // Allocate and populate data here
-    config->vbuffer = sgMakeVertexBuffer(config->_vtemp, config->nvertices);        // TODO: catch error here
-    sgMakeVertexArray(&config->vbuffer.vao, config->vbuffer.vbo);
-    // TODO: make index and acomponents based on an SGvertextype (SG_VERTEX_POS, SG_VERTEX_TEX, SG_VERTEX_NORMAL, SG_VERTEX_COLOR)
-    sgConfigureVertexAttrib(config->vbuffer.vao, 0, 3, 3);
+    if (config->texcoords != NULL && config->ntexcoords > 0) {
+        sgLogInfo("Constructing mesh with texcoord count: %d", config->ntexcoords);
+        config->vbuffer = sgMakeVertexBuffer(config->verts, config->nvertices, config->texcoords, config->ntexcoords);
+    } else {
+        sgLogInfo("Constructing mesh with no texcoords");
+        config->vbuffer = sgMakeVertexBuffer(config->verts, config->nvertices, NULL, 0);
+    }
     
-    config->_vtemp = NULL;
+    for (int i = 0; i < 4; i++) {
+        if (config->vbuffer.vbo[i] == 0) {
+            ccontext.target->err = 1;
+            sgLogError("Error constructing a mesh: vbo generation failed");
+            sgUnbindConstructor();
+            return;
+        }
+    }
+    config->verts = NULL;
     
+    sgMakeVertexArray(&config->vbuffer.vao);
+    if (config->vbuffer.vao == 0) {
+        ccontext.target->err = 1;
+        sgLogError("Error constructing a mesh: vao generation failed");
+        sgUnbindConstructor();
+        return;
+    }
+    
+    glBindVertexArray(config->vbuffer.vao);
+    
+    glBindBuffer(GL_ARRAY_BUFFER, config->vbuffer.vbo[SG_VATTR_LOCATION_POS]);
+    sgConfigureVertexAttrib(config->vbuffer.vao, SG_VATTR_LOCATION_POS, 3, 3);  // position (location=0)
+    
+    if (config->texcoords != NULL && config->ntexcoords > 0) {
+        glBindBuffer(GL_ARRAY_BUFFER, config->vbuffer.vbo[SG_VATTR_LOCATION_TEX]);
+        sgConfigureVertexAttrib(config->vbuffer.vao, SG_VATTR_LOCATION_TEX, 2, 2);  // texcoords (location=1)
+    }
+    
+    // glBindBuffer(GL_ARRAY_BUFFER, config->vbuffer.vbo[SG_VATTR_LOCATION_COLOR]);
+    // sgConfigureVertexAttrib(config->vbuffer.vao, SG_VATTR_LOCATION_COLOR, 3, 3);  // color (location=2)
+    
+    // glBindBuffer(GL_ARRAY_BUFFER, config->vbuffer.vbo[SG_VATTR_LOCATION_NORMAL]);
+    // sgConfigureVertexAttrib(config->vbuffer.vao, SG_VATTR_LOCATION_NORMAL, 3, 3);  // normals (location=3)
+
+    glBindVertexArray(0);
+
     // Pass to store context to store texture data
     sgStoreMesh((SGhandle*)ccontext.target);
     #ifndef SOGL_MANUAL_CONTEXT
@@ -80,8 +117,13 @@ void sgConstShader(void) {
     // Process shader data based on config
     SGshaderconfig* config = (SGshaderconfig*)ccontext.target->config;
     // Allocate and populate data here
-    sgLogInfo("Constructing Shader with sources: %s | %s", config->vertexShaderSource, config->fragmentShaderSource);
+    sgLogInfo("Constructing Shader from sources:\n%s\n%s", config->vertexShaderSource, config->fragmentShaderSource);
     config->shader = sgMakeShader(config->vertexShaderSource, config->fragmentShaderSource);
+    if (config->shader.program == -1) {
+        ccontext.target->err = 1;
+        sgLogError("Error constructing a shader: program generation failed");
+        return;
+    }
     // Pass to store context to store texture data
     sgStoreShader((SGhandle*)ccontext.target);
     #ifndef SOGL_MANUAL_CONTEXT
@@ -94,7 +136,13 @@ void sgConstTexture(void) {
     SGtexconfig* config = (SGtexconfig*)ccontext.target->config;
     
     // Allocate and populate data here (load texture data)
-    sgLogInfo("Constructing Texture with width %d and height %d", config->width, config->height);
+    sgLogInfo("Constructing Texture from source: %s", config->src);
+    config->texture2D = sgMakeTexture2D(config->src, config->format);
+    if (config->texture2D.raw == NULL) {
+        ccontext.target->err = 1;
+        sgLogError("Error constructing texture: texture data failed to load");
+        return;
+    }
 
     // Pass to store context to store texture data
     sgStoreTexture((SGhandle*)ccontext.target);
