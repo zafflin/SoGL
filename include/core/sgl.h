@@ -50,6 +50,10 @@
 #define SG_COLOR_ATTR_BUFFER SG_NUM_COLOR_COMPONENTS
 #define SG_NORMAL_ATTR_BUFFER SG_NUM_NORMAL_COMPONENTS
 
+// UNIFORMS
+#define SG_UNIFORM_MAX 16
+#define SG_UNIFORM_NAMESIZE 32
+
 #define sgGetVeretxCount(__BUFFER, __ARR) (sizeof( __ARR ) / sizeof( __ARR[0] ) ) / ( ( __BUFFER * 2 ) / 2 )
 
 SGshader defaultShader = {.program=-1};
@@ -65,7 +69,7 @@ void sgFrameBufferCallback(SGwindow* win, int w, int h) {
 
 SGwindow* sgMakeWindow(u32 w, u32 h, char* title) {
     SGwindow* win = glfwCreateWindow(w, h, title, NULL, NULL);
-    if (!sgValidate(win)) {
+    if (!sgValidatePtr(win)) {
         sgLogError("Failed Create Window!");
         return NULL;
     } else {
@@ -140,7 +144,6 @@ void sgConfigureVertexAttrib(u32 vao, u32 index, u32 acomponents, u32 vcomponent
     glEnableVertexAttribArray(index);
 }
 
-#ifndef SGL_STANDALONE
 SGvertexbuffer sgMakeVertexBuffer(f32* verts, u32 vcount, f32* texCoords, u32 tcount) {
     SGvertexbuffer vbuffer;
     vbuffer.vao = -1;
@@ -163,7 +166,6 @@ SGvertexbuffer sgMakeVertexBuffer(f32* verts, u32 vcount, f32* texCoords, u32 tc
     
     return vbuffer;
 }
-#endif
 
 // SHADER
 u32 sgCompileShader(u32 type, const char* source) {
@@ -213,6 +215,42 @@ SGshader sgMakeShader(const char* vertex_src, const char* fragment_src) {
     shader.program = sgLinkShader(vertex_shader, fragment_shader);
     return shader;
 }
+
+// UNIFORMS
+typedef enum SGuniformtypes {
+    SG_UNI_MAT4=0
+} SGuniformtypes;
+
+const GLfloat* sgValuePtr(const SGmat4* mat) {
+    return (const GLfloat*)mat;
+}
+
+void sgUniformMat4(SGuniform* uniform) {
+    if (uniform->data != NULL && uniform->type == SG_UNI_MAT4) {
+        glUniformMatrix4fv(uniform->location, 1, GL_FALSE, (const GLfloat*)uniform->data);
+    }
+}
+
+void sgSetUniforms(SGshader* shader) {
+    for (int i = 0; i < 16; ++i) {
+        SGuniform* uniform = &shader->uniforms[i];
+        if (uniform->data == NULL) {
+            continue;
+        }
+        switch (uniform->type) {
+            case SG_UNI_MAT4:
+                glUniformMatrix4fv(uniform->location, 1, GL_FALSE, (const GLfloat*)uniform->data);
+                break;
+            // case SG_UNI_VEC3:
+            //     glUniform3fv(uniform->location, 1, (const GLfloat*)uniform->data);
+            //     break;
+            // TODO: add cases for other uniform types (e.g., SG_UNI_VEC2, SG_UNI_VEC4)
+            default:
+                break;
+        }
+    }
+}
+
 
 // TEXTURE
 SGtexture2D sgMakeTexture2D(char* tex_src, u32 format) {

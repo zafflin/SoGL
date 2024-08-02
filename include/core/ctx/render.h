@@ -62,7 +62,7 @@ SGdrawcall* sgDrawCall(const SGhandle* mhandle, const SGhandle* shandle, const S
         } else {
             call->texID=0;
         }
-        call->shader=sconfig.shader.program;
+        call->shader=sconfig.shader;
         call->nvertices=mconfig.nvertices;
         // sgLogSuccess("GENERATED DRAW CALL\n");
     }// else sgLogError("FAILED TO GENERATE DRAW CALL FOR GIVEN DATA\n");
@@ -82,7 +82,8 @@ void sgRender(SGdrawcall* call) {
     sgBindRender(call); rcontext.drawcalls++;
     // sgLogInfo("DRAW CALL BOUND TO RENDER CONTEXT\n");
     glBindTexture(GL_TEXTURE_2D, call->texID);
-    glUseProgram(call->shader);
+    glUseProgram(call->shader.program);
+    // TODO: set uniforms from uniform structure data
     glBindVertexArray(call->vao);
     glDrawArrays(rcontext.mode, 0, call->nvertices);
     rcontext.npass++;

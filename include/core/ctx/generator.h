@@ -100,14 +100,21 @@ SGhandle sgGenMesh(va_list args) {
 }
 
 // the user should never call this!!!
+// Params: Vertex Source, Fragment Source, Array of Uniform Names
 SGhandle sgGenShader(va_list args) {
     const char* vert_src = va_arg(args, const char*);
     const char* frag_src = va_arg(args, const char*);
+
+    char** uniforms = va_arg(args, char**);
+    u32 nuniforms = va_arg(args, u32);
+
     SGshaderconfig* sconfig = malloc(sizeof(SGshaderconfig));
     if (!sconfig) {
         sgLogInfo("Failed to allocate memory for handle configuration");
         return (SGhandle){0};
     }
+
+    sconfig->uniforms = uniforms;
     sconfig->vertexShaderSource = vert_src;
     sconfig->fragmentShaderSource = frag_src;
     SGhandle shandle = {.id=gcontext.next[SG_SHADER]++, .err=0, .type=SG_SHADER, .config=sconfig, .enabled=0};

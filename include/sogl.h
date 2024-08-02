@@ -136,7 +136,7 @@ void soglInit(void) {
       "   fragColor = texture(fTexture, texCoord) * baseColor;\n"
       "}";
 
-      sgDefaultShader = sgGenHandle(SG_SHADER, sgDefaultVertexShader, sgDefaultFragmentShader);
+      sgDefaultShader = sgGenHandle(SG_SHADER, sgDefaultVertexShader, sgDefaultFragmentShader, (char*[]) {"model"}, 1);
       sgBindConstructor(&sgDefaultShader);
     #endif
 }

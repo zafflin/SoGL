@@ -7,7 +7,7 @@
 #include <stddef.h>
 #include <stdbool.h>
 
-#define sgValidate(ptr) (ptr==NULL) ? 0 : 1
+#define sgValidatePtr(ptr) (ptr==NULL) ? 0 : 1
 
 // Unsigned int types.
 typedef unsigned char u8;
@@ -33,14 +33,21 @@ typedef struct SGcontext SGcontext;
 
 // Dynamic vertex buffers (position + texcoords + colors + indices arrays)
 typedef struct SGvertexbuffer {
-    int nverts;                 // Number of vertices in the buffer
     unsigned int vao;           // OpenGL Vertex Array Object id
     unsigned int vbo[4];           // OpenGL Vertex Buffer Objects id (4 types of vertex data [position, texture, color, normal])
+    unsigned int nverts;                 // Number of vertices in the buffer
 } SGvertexbuffer;
+
+typedef struct SGuniform {
+    char* name;
+    void* data;
+    unsigned int type;      // SoGL uniform type ( SG_UNI_MAT4, SG_UNI_VEC2/3/4, etc.. )
+    unsigned int location;
+} SGuniform;
 
 typedef struct SGshader {
     u32 program;
-    // other fields ( uniforms, etc...? )
+    SGuniform uniforms[16];     // 16 uniforms per shader :)
 } SGshader;
 
 typedef struct SGtexture2D {
@@ -83,6 +90,8 @@ typedef struct SGtexconfig {
 
 typedef struct SGshaderconfig {
     SGshader shader;
+    char** uniforms;
+    unsigned int nuniforms;
     const char* vertexShaderSource;
     const char* fragmentShaderSource;
 } SGshaderconfig;
@@ -122,10 +131,10 @@ void sgStoreShader(SGhandle* handle);
 void sgStoreTexture(SGhandle* handle);
 
 typedef struct SGdrawcall {
+    SGshader shader;
     unsigned int err;
-    int vao;
-    int texID;
-    int shader;
+    unsigned int vao;
+    unsigned int texID;
     unsigned int nvertices;
 } SGdrawcall;
 void sgGetRenderModeStr(char* str);

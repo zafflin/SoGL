@@ -124,6 +124,9 @@ void sgConstShader(void) {
         sgLogError("Error constructing a shader: program generation failed");
         return;
     }
+
+    // TODO: populate shader uniform structures with names, and locations. ( UNIFORM RETRIEVAL FOR DATA SETTING WITH A SHADER HANDLE IS VIA STORE CONTEXT AS SHADER UNIFORMS ARE TREATED AS STANDARD SOGL PIPELINE RESOURCES. sgUniformMat4 would set a const SGmat4* to the void* data field of the uniform, allowing the uniform to keep an up to date referance of the matrix being set to it, )
+
     // Pass to store context to store texture data
     sgStoreShader((SGhandle*)ccontext.target);
     #ifndef SOGL_MANUAL_CONTEXT
