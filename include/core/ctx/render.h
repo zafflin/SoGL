@@ -47,10 +47,18 @@ void sgBeginRender(u32 mode) {
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 }
 
-SGdrawcall* sgDrawCall(const SGhandle* mhandle, const SGhandle* shandle, const SGhandle* thandle) {
+SGdrawcall* sgDrawCall(const SGhandle* mhandle, const SGhandle* thandle, const SGhandle* shandle, const SGhandle* uniforms, u32 nuniforms) {
     SGdrawcall* call = &defaultCall;
     b8 hasTexture = 0;
     if (thandle != NULL && !thandle->err) hasTexture=1;
+    
+    if (uniforms != NULL && nuniforms > 0) {
+        call->nuniforms = nuniforms;
+        for (int i = 0; i < nuniforms; i++) {
+            call->uniforms[i] = (!uniforms[i].err && uniforms[i].enabled) ? uniforms[i] : (SGhandle){0, .err=1};
+        }
+    }
+    
     if (mhandle && !mhandle->err && !shandle->err && mhandle->type == SG_MESH) {
         SGmeshconfig mconfig = *(SGmeshconfig*)mhandle->config;
         SGshaderconfig sconfig = *(SGshaderconfig*)shandle->config;
@@ -83,7 +91,11 @@ void sgRender(SGdrawcall* call) {
     // sgLogInfo("DRAW CALL BOUND TO RENDER CONTEXT\n");
     glBindTexture(GL_TEXTURE_2D, call->texID);
     glUseProgram(call->shader.program);
-    // TODO: set uniforms from uniform structure data
+    if (call->nuniforms > 0) {
+        for (int i = 0; i < call->nuniforms; i++) {
+            sgSendUniform(&call->uniforms[i]);
+        }
+    }
     glBindVertexArray(call->vao);
     glDrawArrays(rcontext.mode, 0, call->nvertices);
     rcontext.npass++;

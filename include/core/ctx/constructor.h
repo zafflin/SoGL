@@ -36,6 +36,9 @@ void* sgBindConstructor(SGhandle* target) {
                 case SG_TEXTURE: 
                     sgConstTexture();
                     break;
+                case SG_UNIFORM:
+                    sgConstUniform();
+                    break;
                 default: break;
             }
         #endif
@@ -122,11 +125,10 @@ void sgConstShader(void) {
     if (config->shader.program == -1) {
         ccontext.target->err = 1;
         sgLogError("Error constructing a shader: program generation failed");
+        sgUnbindConstructor();
         return;
     }
-
-    // TODO: populate shader uniform structures with names, and locations. ( UNIFORM RETRIEVAL FOR DATA SETTING WITH A SHADER HANDLE IS VIA STORE CONTEXT AS SHADER UNIFORMS ARE TREATED AS STANDARD SOGL PIPELINE RESOURCES. sgUniformMat4 would set a const SGmat4* to the void* data field of the uniform, allowing the uniform to keep an up to date referance of the matrix being set to it, )
-
+    
     // Pass to store context to store texture data
     sgStoreShader((SGhandle*)ccontext.target);
     #ifndef SOGL_MANUAL_CONTEXT
@@ -144,6 +146,7 @@ void sgConstTexture(void) {
     if (config->texture2D.raw == NULL) {
         ccontext.target->err = 1;
         sgLogError("Error constructing texture: texture data failed to load");
+        sgUnbindConstructor();
         return;
     }
 
@@ -154,5 +157,28 @@ void sgConstTexture(void) {
     #endif
 }
 
+void sgConstUniform(void) {
+    // process uniform data based on config
+    SGuniformconfig* config = (SGuniformconfig*)ccontext.target->config;
+    SGshaderconfig* sconfig = (SGshaderconfig*)config->shandle->config;
+    // allocate and populate data here
+    sgLogInfo("Constructing Uniform: %s Shader Program: [%d]", config->name, sconfig->shader.program);
+    
+    int location = glGetUniformLocation(sconfig->shader.program, config->name);
+    if (location <= -1) {
+        ccontext.target->err = 1;
+        sgLogError("Unable to retrieve uniform location: %s", config->name);
+        sgUnbindConstructor();
+        return;
+    }
+    
+    config->uniform = (SGuniform) {.name=config->name, .data=NULL, .type=config->type, .location=location};
+
+    // pass to store context to store uniform data
+    sgStoreUniform(ccontext.target);
+    #ifndef SOGL_MANUAL_CONTEXT
+        sgUnbindConstructor();
+    #endif
+}
 
 

@@ -3,6 +3,8 @@
 #include <math.h>
 #include "defines.h"
 
+#define SG_PI		3.14159265358979323846      // M_PI equivalent
+
 typedef struct SGvec2 {
     float x, y;
 } SGvec2;

@@ -46,8 +46,7 @@ typedef struct SGuniform {
 } SGuniform;
 
 typedef struct SGshader {
-    u32 program;
-    SGuniform uniforms[16];     // 16 uniforms per shader :)
+    unsigned int program;
 } SGshader;
 
 typedef struct SGtexture2D {
@@ -59,11 +58,12 @@ typedef struct SGtexture2D {
 } SGtexture2D;
 
 // Resource Types
-#define SG_RESOURCE_TYPES 3     // global count of resource types (mainly for generation count)
+#define SG_RESOURCE_TYPES 4     // global count of resource types (mainly for generation count)
 typedef enum ResourceType {
     SG_MESH=0,
     SG_SHADER,
-    SG_TEXTURE
+    SG_TEXTURE,
+    SG_UNIFORM
 } ResourceType;
 
 typedef enum SGhandletype {
@@ -88,10 +88,15 @@ typedef struct SGtexconfig {
    SGtexture2D texture2D;
 } SGtexconfig;
 
+typedef struct SGuniformconfig {
+    char* name;
+    unsigned int type;      // SoGL uniform type ( SG_UNI_MAT4, SG_UNI_VEC2/3/4, etc.. )
+    SGhandle* shandle;
+    SGuniform uniform;
+} SGuniformconfig;
+
 typedef struct SGshaderconfig {
     SGshader shader;
-    char** uniforms;
-    unsigned int nuniforms;
     const char* vertexShaderSource;
     const char* fragmentShaderSource;
 } SGshaderconfig;
@@ -108,20 +113,23 @@ void sgGetHandleStr(const SGhandle* handle, char* str) {
     if (handle->type == SG_MESH) sprintf(str, "SG_MESH");
     else if (handle->type == SG_SHADER) sprintf(str, "SG_SHADER");
     else if (handle->type == SG_TEXTURE) sprintf(str, "SG_TEXTURE");
+    else if (handle->type == SG_UNIFORM) sprintf(str, "SG_UNIFORM");
 }
 
 void sgBindGenerator(SGhandle* target);
 void sgUnbindGenerator(void);
 SGhandle sgGenHandle(u32 htype, ...);
-SGhandle sgGenTexture(va_list args);
-SGhandle sgGenShader(va_list args);
 SGhandle sgGenMesh(va_list args);
+SGhandle sgGenShader(va_list args);
+SGhandle sgGenTexture(va_list args);
+SGhandle sgGenUniform(va_list args);
 
 void* sgBindConstructor(SGhandle* target);
 void sgUnbindConstructor(void);
-void sgConstTexture(void);
-void sgConstShader(void);
 void sgConstMesh(void);
+void sgConstShader(void);
+void sgConstTexture(void);
+void sgConstUniform(void);
 
 void sgBindStore(SGhandle* target);
 void sgUnbindStore(void);
@@ -129,6 +137,7 @@ void sgInitResourceBlock(ResourceType type);
 void sgStoreMesh(SGhandle* handle);
 void sgStoreShader(SGhandle* handle);
 void sgStoreTexture(SGhandle* handle);
+void sgStoreUniform(SGhandle* handle);
 
 typedef struct SGdrawcall {
     SGshader shader;
@@ -136,10 +145,12 @@ typedef struct SGdrawcall {
     unsigned int vao;
     unsigned int texID;
     unsigned int nvertices;
+    unsigned int nuniforms;
+    SGhandle uniforms[16];      // 1 shader per draw call, 16 uniforms per shader :)
 } SGdrawcall;
 void sgGetRenderModeStr(char* str);
 void sgBeginRender(u32 mode);
-SGdrawcall* sgDrawCall(const SGhandle* mhandle, const SGhandle* shandle, const SGhandle* thandle);
+SGdrawcall* sgDrawCall(const SGhandle* mhandle, const SGhandle* thandle, const SGhandle* shandle, const SGhandle* uniforms, u32 nuniforms);
 void sgRender(SGdrawcall* call);
 void sgUnbindRender(void);
 void sgEndRender(void* window);

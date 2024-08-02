@@ -54,7 +54,17 @@
 #define SG_UNIFORM_MAX 16
 #define SG_UNIFORM_NAMESIZE 32
 
+// god mode macros xD
+#define sgValuePtr(mat) ( (const GLfloat*)mat )
 #define sgGetVeretxCount(__BUFFER, __ARR) (sizeof( __ARR ) / sizeof( __ARR[0] ) ) / ( ( __BUFFER * 2 ) / 2 )
+
+// UNIFORMS TYPES
+typedef enum SGuniformtypes {
+    SG_UNI_MAT4=0,
+    SG_UNI_VEC2,
+    SG_UNI_VEC3,
+    SG_UNI_VEC4
+} SGuniformtypes;
 
 SGshader defaultShader = {.program=-1};
 SGvertexbuffer defaultBuffer = {.nverts=0, .vao=-1, .vbo={0,0,0,0}};
@@ -216,38 +226,41 @@ SGshader sgMakeShader(const char* vertex_src, const char* fragment_src) {
     return shader;
 }
 
-// UNIFORMS
-typedef enum SGuniformtypes {
-    SG_UNI_MAT4=0
-} SGuniformtypes;
-
-const GLfloat* sgValuePtr(const SGmat4* mat) {
-    return (const GLfloat*)mat;
-}
-
 void sgUniformMat4(SGuniform* uniform) {
+    
     if (uniform->data != NULL && uniform->type == SG_UNI_MAT4) {
-        glUniformMatrix4fv(uniform->location, 1, GL_FALSE, (const GLfloat*)uniform->data);
+        glUniformMatrix4fv(uniform->location, 1, GL_FALSE, sgValuePtr((SGmat4*)uniform->data));
     }
 }
 
-void sgSetUniforms(SGshader* shader) {
-    for (int i = 0; i < 16; ++i) {
-        SGuniform* uniform = &shader->uniforms[i];
-        if (uniform->data == NULL) {
-            continue;
+void sgSetUniform(SGhandle* uhandle, void* data) {
+    SGuniformconfig* config = (SGuniformconfig*)uhandle->config;
+    SGuniform* uniform = &config->uniform;
+    switch (uniform->type) {
+        case SG_UNI_MAT4: {
+            uniform->data = (SGmat4*)data;
+            break;
         }
-        switch (uniform->type) {
-            case SG_UNI_MAT4:
-                glUniformMatrix4fv(uniform->location, 1, GL_FALSE, (const GLfloat*)uniform->data);
-                break;
-            // case SG_UNI_VEC3:
-            //     glUniform3fv(uniform->location, 1, (const GLfloat*)uniform->data);
-            //     break;
-            // TODO: add cases for other uniform types (e.g., SG_UNI_VEC2, SG_UNI_VEC4)
-            default:
-                break;
-        }
+    }
+}
+
+void sgSendUniform(SGhandle* uhandle) {
+    SGuniformconfig* config = (SGuniformconfig*)uhandle->config;
+    SGuniform* uniform = &config->uniform;
+    if (uniform->data == NULL) {
+        return; // uniform data not present/uniform not constructed
+    }
+    
+    switch (uniform->type) {
+        case SG_UNI_MAT4:
+            sgUniformMat4(uniform);
+            break;
+        // case SG_UNI_VEC3:
+        //     glUniform3fv(uniform->location, 1, (const GLfloat*)uniform->data);
+        //     break;
+        // TODO: add cases for other uniform types (e.g., SG_UNI_VEC2, SG_UNI_VEC4)
+        default:
+            break;
     }
 }
 

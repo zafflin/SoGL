@@ -45,6 +45,7 @@ struct SGcontext {
   b8 init;
 };
 static SGcontext SOGL;
+static SGhandle sgModelUniform = {0};
 static SGhandle sgDefaultShader = {0};
 
 void sgContextDebug(const SGcontext *ctx) {
@@ -112,6 +113,7 @@ void soglInit(void) {
     sgInitResourceBlock(SG_MESH);
     sgInitResourceBlock(SG_SHADER);
     sgInitResourceBlock(SG_TEXTURE);
+    sgInitResourceBlock(SG_UNIFORM);
 
     sgContextDebug(&SOGL);
 
@@ -121,8 +123,9 @@ void soglInit(void) {
       "layout (location=0) in vec3 vPos;\n"
       "layout (location=1) in vec2 vTexCoord;\n"
       "out vec2 texCoord;\n"
+      "\nuniform mat4 m_model;\n"
       "void main() {\n"
-      "   gl_Position = vec4(vPos, 1.0);\n"
+      "   gl_Position = m_model * vec4(vPos, 1.0);\n"
       "   texCoord = vec2(vTexCoord);\n"
       "}";
       
@@ -135,8 +138,12 @@ void soglInit(void) {
       "   vec4 baseColor = vec4(1.0);\n"
       "   fragColor = texture(fTexture, texCoord) * baseColor;\n"
       "}";
-
-      sgDefaultShader = sgGenHandle(SG_SHADER, sgDefaultVertexShader, sgDefaultFragmentShader, (char*[]) {"model"}, 1);
+      
+      sgDefaultShader = sgGenHandle(SG_SHADER, sgDefaultVertexShader, sgDefaultFragmentShader);
       sgBindConstructor(&sgDefaultShader);
+
+      sgModelUniform = sgGenHandle(SG_UNIFORM, "m_model", SG_UNI_MAT4, &sgDefaultShader);
+      sgBindConstructor(&sgModelUniform);
+
     #endif
 }

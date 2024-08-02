@@ -9,7 +9,7 @@ typedef struct SGgcontext {
     SGhandle* target;
     unsigned int next[SG_RESOURCE_TYPES];
 } SGgcontext;
-static SGgcontext gcontext = {.bound=false, .target=NULL};
+static SGgcontext gcontext = {.bound=false, .target=NULL, .next={0,0,0,0}};
 
 // GENERATOR CONTEXT
 // the user should never call this!!!
@@ -47,6 +47,7 @@ SGhandle sgGenHandle(u32 htype, ...) {
         case SG_MESH: handle =    sgGenMesh(args);      break;
         case SG_SHADER: handle =  sgGenShader(args);    break;
         case SG_TEXTURE: handle = sgGenTexture(args);   break;
+        case SG_UNIFORM: handle = sgGenUniform(args);   break;
         default: sgLogInfo("Unknown handle type");      break;
     }
     va_end(args);
@@ -95,8 +96,35 @@ SGhandle sgGenMesh(va_list args) {
     }
     
     SGhandle mhandle = {.id=gcontext.next[SG_MESH]++, .err=0, .type=SG_MESH, .config=mconfig, .enabled=0};
-    sgBindGenerator(&mhandle);
+    // sgBindGenerator(&mhandle);
     return mhandle;
+}
+
+// the user should never call this!!!
+// NOTE: used in shader generation to configure uniform types
+SGhandle sgGenUniform(va_list args) {
+    char* name = va_arg(args, char*);
+    unsigned int type = va_arg(args, unsigned int);
+    SGhandle* shandle = va_arg(args, SGhandle*);
+
+    SGuniformconfig* uconfig = malloc(sizeof(SGuniformconfig));
+    if (!uconfig) {
+        sgLogInfo("Failed to allocate memory for handle configuration");
+        free(uconfig);
+        return (SGhandle){0};
+    }
+
+    if (shandle->err) {
+        sgLogInfo("Failed to generate uniform handle, associated shader has errors");
+        free(uconfig);
+        return (SGhandle){0};
+    } else { uconfig->shandle = shandle; }
+
+    uconfig->name = name;
+    uconfig->type = type;
+    SGhandle uhandle = {.id=gcontext.next[SG_UNIFORM]++, .err=0, .type=SG_UNIFORM, .config=uconfig, .enabled=0};
+    // sgBindGenerator(&uhandle);
+    return uhandle;
 }
 
 // the user should never call this!!!
@@ -105,20 +133,17 @@ SGhandle sgGenShader(va_list args) {
     const char* vert_src = va_arg(args, const char*);
     const char* frag_src = va_arg(args, const char*);
 
-    char** uniforms = va_arg(args, char**);
-    u32 nuniforms = va_arg(args, u32);
-
     SGshaderconfig* sconfig = malloc(sizeof(SGshaderconfig));
     if (!sconfig) {
         sgLogInfo("Failed to allocate memory for handle configuration");
+        free(sconfig);
         return (SGhandle){0};
     }
 
-    sconfig->uniforms = uniforms;
     sconfig->vertexShaderSource = vert_src;
     sconfig->fragmentShaderSource = frag_src;
     SGhandle shandle = {.id=gcontext.next[SG_SHADER]++, .err=0, .type=SG_SHADER, .config=sconfig, .enabled=0};
-    sgBindGenerator(&shandle);
+    // sgBindGenerator(&shandle);
     return shandle;
 }
 
@@ -129,11 +154,12 @@ SGhandle sgGenTexture(va_list args) {
     SGtexconfig* tconfig = malloc(sizeof(SGtexconfig));
     if (!tconfig) {
         sgLogInfo("Failed to allocate memory for handle configuration");
+        free(tconfig);
         return (SGhandle){0};
     }
     tconfig->src = src;
     tconfig->format = format;
     SGhandle thandle = {.id=gcontext.next[SG_TEXTURE]++, .err=0, .type=SG_TEXTURE, .config=tconfig, .enabled=0};
-    sgBindGenerator(&thandle);
+    // sgBindGenerator(&thandle);
     return thandle;
 }

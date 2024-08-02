@@ -48,9 +48,9 @@ static b8 _initialized;
     }
 #endif
 
-SGdrawcall* sgDrawQuad(SGhandle* shandle, SGhandle* thandle) {
+SGdrawcall* sgDrawQuad(SGhandle* thandle, SGhandle* shandle, const SGhandle* uniforms, u32 nuniforms) {
     #ifdef SG_PREGENERATE
-        return sgDrawCall(&sgQuad, shandle, thandle);
+        return sgDrawCall(&sgQuad, thandle, shandle, uniforms, nuniforms);
     #else
         static b8 genquad = 0;
         static SGhandle mhandle = {0};
@@ -62,19 +62,28 @@ SGdrawcall* sgDrawQuad(SGhandle* shandle, SGhandle* thandle) {
             -0.5f, -0.5f, 0.0f,
             -0.5f,  0.5f, 0.0f,
             0.5f,  0.5f, 0.0f};
+
+        f32 qtexcoords[] = {
+            1.0f, 1.0f,
+            1.0f, 0.0f,
+            0.0f, 0.0f,
+
+            0.0f, 0.0f,
+            0.0f, 1.0f,
+            1.0f, 1.0f};
         
         if (genquad == 0) {
-            mhandle = sgGenHandle(SG_MESH, quad, sgGetVeretxCount(SG_POS_ATTR_BUFFER, quad), NULL, 0);
+            mhandle = sgGenHandle(SG_MESH, quad, sgGetVeretxCount(SG_POS_ATTR_BUFFER, quad), qtexcoords, sgGetVeretxCount(SG_TEX_ATTR_BUFFER, qtexcoords));;
             sgBindConstructor(&mhandle);
         }
         if (mhandle.id >= 0 && !mhandle.err) { genquad = 1; }
-        return sgDrawCall(&mhandle, shandle, thandle);
+        return sgDrawCall(&mhandle, thandle, shandle,  uniforms, nuniforms);
     #endif
 }
 
-SGdrawcall* sgDrawTriangle(SGhandle* shandle, SGhandle* thandle) {
+SGdrawcall* sgDrawTriangle(SGhandle* thandle, SGhandle* shandle, const SGhandle* uniforms, u32 nuniforms) {
     #ifdef SG_PREGENERATE
-        return sgDrawCall(&sgTriangle, shandle, thandle);
+        return sgDrawCall(&sgTriangle, thandle, shandle,  uniforms, nuniforms);
     #else
         static b8 gentriangle = 0;
         static SGhandle mhandle = {0};
@@ -83,12 +92,17 @@ SGdrawcall* sgDrawTriangle(SGhandle* shandle, SGhandle* thandle) {
             0.5f, -0.5f, 0.0f,
             -0.5f, -0.5f, 0.0f};
         
+        f32 ttexcoords[] = {
+            0.5f, 1.0f,
+            1.0f, 0.0f,
+            0.0f, 0.0f};
+        
         if (gentriangle == 0) {
-            mhandle = sgGenHandle(SG_MESH, triangle, sgGetVeretxCount(SG_POS_ATTR_BUFFER, triangle), NULL, 0);
+            mhandle = sgGenHandle(SG_MESH, triangle, sgGetVeretxCount(SG_POS_ATTR_BUFFER, triangle), ttexcoords, sgGetVeretxCount(SG_TEX_ATTR_BUFFER, ttexcoords));
             sgBindConstructor(&mhandle);
         }
         if (mhandle.id >= 0 && !mhandle.err) { gentriangle = 1; }
-        return sgDrawCall(&mhandle, shandle, thandle);
+        return sgDrawCall(&mhandle, thandle, shandle,  uniforms, nuniforms);
     #endif
 }
 

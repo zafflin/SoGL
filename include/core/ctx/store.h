@@ -24,7 +24,7 @@ typedef struct MeshBlock {
     bool init;
     unsigned int max;
     unsigned int num;
-    unsigned int *vbo[SG_MESH_MAX];
+    unsigned int* vbo[SG_MESH_MAX];
     unsigned int ebo[SG_MESH_MAX];
     unsigned int vao[SG_MESH_MAX];
 } MeshBlock;
@@ -37,6 +37,17 @@ typedef struct ShaderBlock {
     unsigned int program[SG_SHADER_MAX];
 } ShaderBlock;
 static ShaderBlock sblock;
+
+typedef struct UniformBlock {
+    bool init;
+    unsigned int max;
+    unsigned int num;
+    char* name[62];     // 62 ( SG_SHADER_MAX=1000 / 16(uniforms per shader) = 62.5 uniforms total, if every shader had max uniforms )
+    void* data[62];
+    unsigned int type[62];      // SoGL uniform type ( SG_UNI_MAT4, SG_UNI_VEC2/3/4, etc.. )
+    unsigned int location[62];
+} UniformBlock;
+static UniformBlock ublock;
 
 // STORE CONTEXT
 // the user should never call this!!!
@@ -98,6 +109,19 @@ void sgInitResourceBlock(ResourceType type) {
                 }
             }
             break;
+        case (SG_UNIFORM):
+            ublock.max = 62;
+            ublock.num = 0;
+            ublock.init = true;
+
+            for (int i = 0; i < 62; i++) {
+                ublock.name[i] = (char*)malloc(sizeof(char)*SG_UNIFORM_NAMESIZE);
+                if (ublock.name[i] == NULL) {
+                    sgLogError("Error allocating memory for uniform block name field");
+                    return;
+                }
+            }
+
         default:
             break;
     }
@@ -120,6 +144,7 @@ void sgStoreMesh(SGhandle* handle) {
             for (int i = 0; i < 4; i++) {
                 if (config->vbuffer.vbo[i] == -1) { return; } else mblock.vbo[index][i] = config->vbuffer.vbo[i];
             }
+            handle->enabled = 1;
             mblock.num++;
             sgLogInfo("STORED MESH: [%d] COUNT: [%d] MAX: [%d]", index, mblock.num, mblock.max);
         }
@@ -139,6 +164,7 @@ void sgStoreShader(SGhandle* handle) {
             SGshaderconfig* config = (SGshaderconfig*)handle->config;
             sgLogInfo("STORING SHADER: [%d] COUNT: [%d] MAX: [%d]", index, sblock.num, sblock.max);
             sblock.program[index] = config->shader.program;
+            handle->enabled = 1;
             sblock.num++;
             sgLogInfo("STORED SHADER: [%d] PROGRAM: [%d] COUNT: [%d] MAX: [%d]", index, sblock.program[index], sblock.num, sblock.max);
         }
@@ -146,7 +172,7 @@ void sgStoreShader(SGhandle* handle) {
 }
 
 void sgStoreTexture(SGhandle* handle) {
-        if (!tblock.init) {
+    if (!tblock.init) {
         sgLogInfo("RESOURCE BLOCK NOT INITIALIZED!");
         return;
     }
@@ -171,10 +197,37 @@ void sgStoreTexture(SGhandle* handle) {
             tblock.height[index] = config->texture2D.height;
             
             // stbi_image_free(config->texture2D.raw);
-
+            
+            handle->enabled = 1;
             tblock.num++;
             sgLogInfo("STORED TEXTURE: [%d] COUNT: [%d] MAX: [%d]", index, tblock.num, tblock.max);
         }
     }
 }
 
+void sgStoreUniform(SGhandle* handle) {
+    if (!ublock.init) {
+        sgLogInfo("RESOURCE BLOCK NOT INITIALIZED!");
+        return;
+    }
+
+    if (!handle->err && handle->type == SG_UNIFORM) {
+        sgBindStore(handle);
+        unsigned int index = handle->id;
+        if (ublock.num+1 < ublock.max) {
+            
+            SGuniformconfig* config = (SGuniformconfig*)handle->config;
+            
+            sgLogInfo("STORING UNIFORM: [%d] NAME: [%s] COUNT: [%d] MAX: [%d]", index, config->name, ublock.num, ublock.max);
+
+            ublock.name[index] = config->name;
+            ublock.data[index] = config->uniform.data;
+            ublock.type[index] = config->type;
+            ublock.location[index] = config->uniform.location;
+
+            handle->enabled = 1;
+            ublock.num++;
+            sgLogInfo("STORED UNIFORM: [%d] NAME: [%s] LOCATION: [%d] COUNT: [%d] MAX: [%d]", index, config->name, config->uniform.location, ublock.num, ublock.max);
+        }
+    }
+}
