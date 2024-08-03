@@ -2,7 +2,7 @@
 
 **Simple Open-Source Graphics Library**
 
-SoGL is a simple abstraction-layer for OpenGL inspired by [zafflin's](https://github.com/zafflin) [RayLib](https://github.com/zafflin/SoGL), and [pygame-ce](https://github.com/pygame-community/pygame-ce) ( along with their epic community ).
+SoGL is a simple abstraction-layer for OpenGL inspired by [raysan5's](https://github.com/zafflin) [RayLib](https://github.com/zafflin/SoGL), and [pygame-ce](https://github.com/pygame-community/pygame-ce) ( along with their epic community ).
 
 *NOTE*: like raylib and pygame, SoGL is not there to hold your hand but rather make the learning process smoother, or challenge your knowledge.
 
