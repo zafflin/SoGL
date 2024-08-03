@@ -45,8 +45,13 @@ struct SGcontext {
   b8 init;
 };
 static SGcontext SOGL;
-static SGhandle sgModelUniform = {0};
-static SGhandle sgDefaultShader = {0};
+
+// DEFAULT SHADER/UNIFORMS
+static SGhandle sgDShader1 = {0};
+
+static SGhandle sgDShader2 = {0};
+static SGhandle sgDShader2ModelUni = {0};
+static unsigned int sgDShader2UniCount = 1;
 
 void sgContextDebug(const SGcontext *ctx) {
 	sgLogInfo("SGcontext debug");
@@ -118,7 +123,27 @@ void soglInit(void) {
     sgContextDebug(&SOGL);
 
     #ifdef SG_PRECOMPILE
-      const char* sgDefaultVertexShader = 
+      const char* sgDShader1v = 
+      "# version 400 core\n"
+      "layout (location=0) in vec3 vPos;\n"
+      "layout (location=1) in vec2 vTexCoord;\n"
+      "out vec2 texCoord;\n"
+      "void main() {\n"
+      "   gl_Position = vec4(vPos, 1.0);\n"
+      "   texCoord = vec2(vTexCoord);\n"
+      "}";
+      
+      const char* sgDShader1f = 
+      "#version 400 core\n"
+      "out vec4 fragColor;\n"
+      "in vec2 texCoord;\n"
+      "uniform sampler2D fTexture;\n"
+      "void main() {\n"
+      "   vec4 baseColor = vec4(1.0);\n"
+      "   fragColor = texture(fTexture, texCoord) * baseColor;\n"
+      "}";
+    
+      const char* sgDShader2v = 
       "# version 400 core\n"
       "layout (location=0) in vec3 vPos;\n"
       "layout (location=1) in vec2 vTexCoord;\n"
@@ -129,7 +154,7 @@ void soglInit(void) {
       "   texCoord = vec2(vTexCoord);\n"
       "}";
       
-      const char* sgDefaultFragmentShader = 
+      const char* sgDShader2f = 
       "#version 400 core\n"
       "out vec4 fragColor;\n"
       "in vec2 texCoord;\n"
@@ -139,11 +164,9 @@ void soglInit(void) {
       "   fragColor = texture(fTexture, texCoord) * baseColor;\n"
       "}";
       
-      sgDefaultShader = sgGenHandle(SG_SHADER, sgDefaultVertexShader, sgDefaultFragmentShader);
-      sgBindConstructor(&sgDefaultShader);
-
-      sgModelUniform = sgGenHandle(SG_UNIFORM, "m_model", SG_UNI_MAT4, &sgDefaultShader);
-      sgBindConstructor(&sgModelUniform);
-
+      sgDShader1 = sgGenHandle(SG_SHADER, sgDShader1v, sgDShader1f);    sgBindConstructor(&sgDShader1);
+      
+      sgDShader2 = sgGenHandle(SG_SHADER, sgDShader2v, sgDShader2f);    sgBindConstructor(&sgDShader2);
+      sgDShader2ModelUni = sgGenHandle(SG_UNIFORM, "m_model", SG_UNI_MAT4, &sgDShader2); sgBindConstructor(&sgDShader2ModelUni);
     #endif
 }
