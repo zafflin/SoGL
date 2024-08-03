@@ -3,7 +3,7 @@
 #include <sogl.h>
 
 void main() {
-    soglInit(); sgInit2D();
+    soglInit(); sgInitShapes();
     
     SGhandle thandle = sgGenHandle(SG_TEXTURE, "assets\\textures\\brick.jpg", SG_TEX2D_RGB);
     sgBindConstructor(&thandle);

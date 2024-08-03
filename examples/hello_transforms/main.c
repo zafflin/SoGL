@@ -4,7 +4,7 @@
 #include <sogl.h>
 
 void main() {
-    soglInit(); sgInit2D();
+    soglInit(); sgInitShapes();
 
     SGmat4 model = sgIdentity();
     sgSetUniform(&sgDShader2ModelUni, &model);

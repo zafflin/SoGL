@@ -8,7 +8,7 @@ static SGhandle sgTriangle;
 static b8 _initialized;
 
 #ifdef SG_PREGENERATE
-    void sgInit2D(void) {
+    void sgInitShapes(void) {
         f32 quad[] = {
             0.5f,  0.5f, 0.0f,
             0.5f, -0.5f, 0.0f,
@@ -43,7 +43,7 @@ static b8 _initialized;
         sgBindConstructor(&sgTriangle);
     }
 #else
-    void sgInit2D(void) {
+    void sgInitShapes(void) {
 
     }
 #endif
