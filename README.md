@@ -7,16 +7,11 @@ SoGL is a simple abstraction-layer for OpenGL inspired by [raysan5's](https://gi
 *NOTE*: like raylib and pygame, SoGL is not there to hold your hand but rather make the learning process smoother, or challenge your knowledge.
 
 <br>
-<br>
 
 #### Relevant Links
 [ 
   [Official Wiki](https://github.com/zafflin/SoGL/wiki) | [API Documentation](https://github.com/zafflin/SoGL/wiki/SoGL-API-Docs) | [SoGL FAQ](https://github.com/zafflin/SoGL/wiki/SoGL-FAQ)
 ]
-
----
-<br>
-<br>
 
 [![GitHub Releases Downloads](https://img.shields.io/github/downloads/zafflin/SoGL/total)](https://github.com/zafflin/SoGL/releases)
 [![GitHub Stars](https://img.shields.io/github/stars/zafflin/SoGL?style=flat&label=stars)](https://github.com/zafflin/SoGL/stargazers)
@@ -24,7 +19,6 @@ SoGL is a simple abstraction-layer for OpenGL inspired by [raysan5's](https://gi
 [![License](https://img.shields.io/badge/license-zlib%2Flibpng-green.svg)](LICENSE)
 
 ---
-<br>
 <br>
 
 # A Simple Example
@@ -50,7 +44,6 @@ void main() {
 ```
 ---
 <br>
-<br>
 
 # A Simple Installation
 #### (NOTE) SoGL is a header only game-programming library targeting 64bit Windows. 
@@ -73,7 +66,6 @@ It then includes the `SoGL\scripts` directory to the user-level enrionment varia
 
 ---
 <br>
-<br>
 
 # A Simple Learning Resource
 #### (NOTE) SoGL's Github Wiki is always open for edit. If you find any problems during your use, or believe some information may be missing, feel more than free to edit the SoGL Wiki, or open a related issue.
@@ -85,7 +77,6 @@ If your ever itching to find out more about how SoGL works, or are looking for A
 
 ---
 <br>
-<br>
 
 # contributors
 
@@ -94,7 +85,6 @@ If your ever itching to find out more about how SoGL works, or are looking for A
 </a>
 
 ---
-<br>
 <br>
 
 # license
