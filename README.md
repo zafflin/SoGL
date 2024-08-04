@@ -6,6 +6,14 @@ SoGL is a simple abstraction-layer for OpenGL inspired by [raysan5's](https://gi
 
 *NOTE*: like raylib and pygame, SoGL is not there to hold your hand but rather make the learning process smoother, or challenge your knowledge.
 
+<br>
+<br>
+
+#### Relevant Links
+[ 
+  [Official Wiki](https://github.com/zafflin/SoGL/wiki) | [API Documentation](https://github.com/zafflin/SoGL/wiki/SoGL-API-Docs) | [SoGL FAQ](https://github.com/zafflin/SoGL/wiki/SoGL-FAQ)
+]
+
 ---
 <br>
 <br>
@@ -71,9 +79,9 @@ It then includes the `SoGL\scripts` directory to the user-level enrionment varia
 #### (NOTE) SoGL's Github Wiki is always open for edit. If you find any problems during your use, or believe some information may be missing, feel more than free to edit the SoGL Wiki, or open a related issue.
 SoGL has a rather complex backend which drives the simplicity of the public API. With that in mind the public API does have a handfull of examples which are designed to enable you to learn on the fly.
 
-The [SoGL Wiki]() is a treasure trove of information on how the library is designed, how it can be used, and FAQ's. 
+The [SoGL Wiki](https://github.com/zafflin/SoGL/wiki) is a treasure trove of information on how the library is designed, how it can be used, and FAQ's. 
 
-If your ever itching to find out more about how SoGL works, or are looking for API docs, the [official repository]() should be your first stop.
+If your ever itching to find out more about how SoGL works, or are looking for API docs, the [official repository](https://github.com/zafflin/SoGL) should be your first stop.
 
 ---
 <br>

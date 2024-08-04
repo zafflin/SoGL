@@ -45,6 +45,7 @@ void* sgBindConstructor(SGhandle* target) {
     };
 }
 
+// the user should never call this!!!
 void sgUnbindConstructor(void) {
     if (ccontext.bound) {
         ccontext.bound = SGFALSE;
@@ -60,6 +61,7 @@ void sgUnbindConstructor(void) {
     }
 }
 
+// the user should never call this!!!
 void sgConstMesh(void) {
     // Process mesh data based on config
     SGmeshconfig* config = (SGmeshconfig*)ccontext.target->config;
@@ -116,6 +118,7 @@ void sgConstMesh(void) {
     #endif
 }
 
+// the user should never call this!!!
 void sgConstShader(void) {
     // Process shader data based on config
     SGshaderconfig* config = (SGshaderconfig*)ccontext.target->config;
@@ -136,6 +139,7 @@ void sgConstShader(void) {
     #endif
 }
 
+// the user should never call this!!!
 void sgConstTexture(void) {
     // Process texture data based on config
     SGtexconfig* config = (SGtexconfig*)ccontext.target->config;
@@ -157,6 +161,7 @@ void sgConstTexture(void) {
     #endif
 }
 
+// the user should never call this!!!
 void sgConstUniform(void) {
     // process uniform data based on config
     SGuniformconfig* config = (SGuniformconfig*)ccontext.target->config;

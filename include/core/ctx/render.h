@@ -24,6 +24,7 @@ void sgGetRenderModeStr(char* str) {
 }
 
 // RENDER CONTEXT
+// the user should never call this!!!
 void sgBindRender(SGdrawcall* call) {
     if (rcontext.bound && call == NULL) {
         sgUnbindRender();
@@ -33,6 +34,7 @@ void sgBindRender(SGdrawcall* call) {
     }
 }
 
+// the user should never call this!!!
 void sgUnbindRender() {
     if (rcontext.bound) {
         rcontext.bound = false;

@@ -19,14 +19,21 @@ typedef struct SGvec4 {
 
 // SGmat4, 4x4 components, column major, OpenGL style, right handed
 typedef struct SGmat4 {
-    float m0, m4, m8, m12;      // SGmat4 first row (4 components)
-    float m1, m5, m9, m13;      // SGmat4 second row (4 components)
-    float m2, m6, m10, m14;     // SGmat4 third row (4 components)
-    float m3, m7, m11, m15;     // SGmat4 fourth row (4 components)
+    float m0, m4, m8, m12;
+    float m1, m5, m9, m13;
+    float m2, m6, m10, m14;
+    float m3, m7, m11, m15;
 } SGmat4;
 
 
 // VEC2
+void sgGetVec2Str(const SGvec2* vec) {
+    printf("SGvec2 {\n");
+    printf("  x: %.2f,\n", vec->x);
+    printf("  y: %.2f,\n", vec->y);
+    printf("}\n");
+}
+
 void sgScalarVec2a(SGvec2* v1, u32 scalar) {
     v1->x+=scalar;
     v1->y+=scalar;
@@ -139,6 +146,15 @@ void sgCrossVec3(SGvec3* v1, SGvec3 v2) {
 
 
 // VEC4
+void sgGetVec4Str(const SGvec4* vec) {
+    printf("SGvec3 {\n");
+    printf("  x: %.2f,\n", vec->x);
+    printf("  y: %.2f,\n", vec->y);
+    printf("  z: %.2f\n", vec->z);
+    printf("  w: %.2f\n", vec->w);
+    printf("}\n");
+}
+
 void sgScalarVec4a(SGvec4* v1, u32 scalar) {
     v1->x+=scalar;
     v1->y+=scalar;
